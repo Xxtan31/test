@@ -2,52 +2,57 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Key Yönetimi</title>
+    <title>Kayıtlı Anahtarlar</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
     </style>
 </head>
 <body>
-    <h1>Key Yönetimi</h1>
-    <button onclick="loadKeys()">Anahtarları Yükle</button>
-    <table id="keysTable">
+    <h1>Kayıtlı Anahtarlar</h1>
+    <table>
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Anahtar</th>
-                <th>HWID</th>
                 <th>Kullanım Limiti</th>
-                <th>Son Kullanım Tarihi</th>
+                <th>Sona Erme Tarihi</th>
                 <th>Kullanım Sayısı</th>
+                <th>HWID</th>
             </tr>
         </thead>
-        <tbody>
-            <!-- Anahtarlar buraya yüklenecek -->
-        </tbody>
+        <tbody id="keys-table-body"></tbody>
     </table>
 
     <script>
-        function loadKeys() {
-            fetch('/keys')
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.getElementById('keysTable').getElementsByTagName('tbody')[0];
-                    tableBody.innerHTML = ''; // Önceki verileri temizle
-                    data.forEach(key => {
-                        const row = tableBody.insertRow();
-                        row.insertCell(0).innerText = key.id;
-                        row.insertCell(1).innerText = key.key;
-                        row.insertCell(2).innerText = key.hwid || 'Yok';
-                        row.insertCell(3).innerText = key.usage_limit;
-                        row.insertCell(4).innerText = key.expiration_date;
-                        row.insertCell(5).innerText = key.uses;
-                    });
-                })
-                .catch(error => console.error('Hata:', error));
-        }
+        fetch('/keys')
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById('keys-table-body');
+                data.forEach(key => {
+                    const row = `<tr>
+                        <td>${key.id}</td>
+                        <td>${key.key}</td>
+                        <td>${key.usage_limit}</td>
+                        <td>${key.expiration_date}</td>
+                        <td>${key.uses}</td>
+                        <td>${key.hwid || 'N/A'}</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => console.error('Error fetching keys:', error));
     </script>
 </body>
 </html>
