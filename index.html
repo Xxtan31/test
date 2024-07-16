@@ -3,118 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anahtarlar</title>
+    <title>Key Yönetimi</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
-        }
-        nav {
-            margin-bottom: 20px;
-        }
-        nav a {
-            margin: 0 10px;
-            text-decoration: none;
-            color: #007BFF;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: left;
-        }
-        th {
-            background-color: #007BFF;
-            color: white;
-        }
-        tr:hover {
-            background-color: #f1f1f1;
-        }
-        h1 {
-            color: #333;
-        }
+        body { font-family: Arial, sans-serif; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
     </style>
 </head>
 <body>
-    <nav>
-        <a href="#" onclick="fetchKeys()">Anahtarları Göster</a>
-        <a href="#" onclick="createKey()">Anahtar Oluştur</a>
-    </nav>
-
-    <h1>Anahtarlar Listesi</h1>
-    <table>
+    <h1>Key Yönetimi</h1>
+    <button onclick="loadKeys()">Anahtarları Yükle</button>
+    <table id="keysTable">
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Anahtar</th>
                 <th>HWID</th>
                 <th>Kullanım Limiti</th>
-                <th>Son Kullanma Tarihi</th>
+                <th>Son Kullanım Tarihi</th>
                 <th>Kullanım Sayısı</th>
             </tr>
         </thead>
-        <tbody id="keys-table-body">
-            <!-- Anahtarlar burada gösterilecek -->
+        <tbody>
+            <!-- Anahtarlar buraya yüklenecek -->
         </tbody>
     </table>
 
     <script>
-        async function fetchKeys() {
-            try {
-                const response = await fetch('/keys');
-                const data = await response.json();
-                const tableBody = document.getElementById('keys-table-body');
-                tableBody.innerHTML = ''; // Önceki verileri temizle
-
-                data.forEach(key => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${key.id}</td>
-                        <td>${key.key}</td>
-                        <td>${key.hwid || 'Yok'}</td>
-                        <td>${key.usage_limit}</td>
-                        <td>${key.expiration_date}</td>
-                        <td>${key.uses}</td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            } catch (error) {
-                console.error('Anahtarları getirirken hata oluştu:', error);
-            }
+        function loadKeys() {
+            fetch('/keys')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('keysTable').getElementsByTagName('tbody')[0];
+                    tableBody.innerHTML = ''; // Önceki verileri temizle
+                    data.forEach(key => {
+                        const row = tableBody.insertRow();
+                        row.insertCell(0).innerText = key.id;
+                        row.insertCell(1).innerText = key.key;
+                        row.insertCell(2).innerText = key.hwid || 'Yok';
+                        row.insertCell(3).innerText = key.usage_limit;
+                        row.insertCell(4).innerText = key.expiration_date;
+                        row.insertCell(5).innerText = key.uses;
+                    });
+                })
+                .catch(error => console.error('Hata:', error));
         }
-
-        async function createKey() {
-            const newKey = prompt("Anahtarı girin:");
-            if (!newKey) return;
-
-            const usageLimit = prompt("Kullanım limitini girin (varsayılan: 1):") || 1;
-            const expirationMinutes = prompt("Son kullanma süresi (dakika olarak):") || 60;
-
-            try {
-                const response = await fetch('/create_key', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        key: newKey,
-                        usage_limit: parseInt(usageLimit),
-                        expiration_minutes: parseInt(expirationMinutes)
-                    })
-                });
-                const result = await response.json();
-                alert(result.message);
-                fetchKeys(); // Anahtarları yeniden yükle
-            } catch (error) {
-                console.error('Anahtar oluşturulurken hata oluştu:', error);
-            }
-        }
-
-        // Sayfa yüklendiğinde anahtarları çek
-        window.onload = fetchKeys;
     </script>
 </body>
 </html>
