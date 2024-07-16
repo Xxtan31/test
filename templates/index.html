@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keys List</title>
+    <script>
+        async function fetchKeys() {
+            const response = await fetch('http://127.0.0.1:5000/keys');
+            const keys = await response.json();
+            const keysContainer = document.getElementById('keysContainer');
+            keysContainer.innerHTML = '';
+
+            keys.forEach(key => {
+                const keyElement = document.createElement('div');
+                keyElement.innerHTML = `
+                    <div>ID: ${key.id}</div>
+                    <div>Expiration Date: ${key.expiration_date}</div>
+                    <div>Key: ${key.key}</div>
+                    <div>Usage Limit: ${key.usage_limit}</div>
+                    <div>Uses: ${key.uses}</div>
+                    <hr>
+                `;
+                keysContainer.appendChild(keyElement);
+            });
+        }
+
+        setInterval(fetchKeys, 1000);
+        window.onload = fetchKeys;
+    </script>
+</head>
+<body>
+    <h1>Keys List</h1>
+    <div id="keysContainer"></div>
+</body>
+</html>
