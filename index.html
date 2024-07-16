@@ -6,7 +6,7 @@
     <title>Keys List</title>
     <script>
         async function fetchKeys() {
-            const response = await fetch('/keys');
+            const response = await fetch('http://127.0.0.1:5000/keys');
             const keys = await response.json();
             const keysContainer = document.getElementById('keysContainer');
             keysContainer.innerHTML = '';
