@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 import threading
@@ -20,7 +20,6 @@ class Key(db.Model):
 with app.app_context():
     db.create_all()
 
-# Key oluşturma endpointi
 @app.route('/create_key', methods=['POST'])
 def create_key():
     data = request.json
@@ -28,34 +27,30 @@ def create_key():
     usage_limit = data.get('usage_limit', 1)
     expiration_minutes = data.get('expiration_minutes', 60)
     expiration_date = datetime.now() + timedelta(minutes=expiration_minutes)
-    
+
     new_key = Key(key=key, usage_limit=usage_limit, expiration_date=expiration_date)
     db.session.add(new_key)
     db.session.commit()
-    
-    return jsonify({"message": "Key created successfully"}), 201
 
-from flask import render_template
+    return jsonify({"message": "Key created successfully"}), 201
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Key kullanma endpointi (HWID ile ilişkilendirir)
 @app.route('/use_key', methods=['POST'])
 def use_key():
     data = request.json
     key = data.get('key')
     hwid = data.get('hwid')
     key_entry = Key.query.filter_by(key=key).first()
-    
+
     if not key_entry:
         return jsonify({"message": "Key not found"}), 404
     
     if key_entry.hwid and key_entry.hwid != hwid:
         return jsonify({"message": "HWID does not match"}), 403
     
-    # Süre kontrolü
     if datetime.now() > key_entry.expiration_date:
         db.session.delete(key_entry)
         db.session.commit()
@@ -63,7 +58,7 @@ def use_key():
     
     if key_entry.uses >= key_entry.usage_limit:
         return jsonify({"message": "Key usage limit reached"}), 403
-    
+
     key_entry.uses += 1
     key_entry.hwid = hwid
     db.session.commit()
@@ -94,7 +89,7 @@ def delete_all_keys():
     except Exception as e:
         db.session.rollback()
         return jsonify({"message": "Failed to delete keys", "error": str(e)}), 500
-        
+
 @app.route('/keys', methods=['GET'])
 def get_keys():
     keys = Key.query.all()
@@ -119,7 +114,7 @@ def delete_expired_keys():
             for key in expired_keys:
                 db.session.delete(key)
             db.session.commit()
-            time.sleep(60)  # Her 60 saniyede bir kontrol et
+            time.sleep(60)
 
 if __name__ == '__main__':
     threading.Thread(target=delete_expired_keys, daemon=True).start()
