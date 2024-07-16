@@ -20,6 +20,10 @@ class Key(db.Model):
 with app.app_context():
     db.create_all()
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 @app.route('/create_key', methods=['POST'])
 def create_key():
     data = request.json
@@ -27,83 +31,30 @@ def create_key():
     usage_limit = data.get('usage_limit', 1)
     expiration_minutes = data.get('expiration_minutes', 60)
     expiration_date = datetime.now() + timedelta(minutes=expiration_minutes)
-
+    
     new_key = Key(key=key, usage_limit=usage_limit, expiration_date=expiration_date)
     db.session.add(new_key)
     db.session.commit()
-
+    
     return jsonify({"message": "Key created successfully"}), 201
-
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/use_key', methods=['POST'])
-def use_key():
-    data = request.json
-    key = data.get('key')
-    hwid = data.get('hwid')
-    key_entry = Key.query.filter_by(key=key).first()
-
-    if not key_entry:
-        return jsonify({"message": "Key not found"}), 404
-    
-    if key_entry.hwid and key_entry.hwid != hwid:
-        return jsonify({"message": "HWID does not match"}), 403
-    
-    if datetime.now() > key_entry.expiration_date:
-        db.session.delete(key_entry)
-        db.session.commit()
-        return jsonify({"message": "Key expired and deleted"}), 403
-    
-    if key_entry.uses >= key_entry.usage_limit:
-        return jsonify({"message": "Key usage limit reached"}), 403
-
-    key_entry.uses += 1
-    key_entry.hwid = hwid
-    db.session.commit()
-    return jsonify({"message": "Key used successfully"}), 200
-
-@app.route('/check_hwid', methods=['POST'])
-def check_hwid():
-    data = request.json
-    hwid = data.get('hwid')
-    key_entry = Key.query.filter_by(hwid=hwid).first()
-
-    if not key_entry:
-        return jsonify({"message": "HWID not found"}), 404
-
-    if datetime.now() > key_entry.expiration_date:
-        db.session.delete(key_entry)
-        db.session.commit()
-        return jsonify({"message": "Key expired and deleted"}), 403
-
-    return jsonify({"message": "HWID valid", "key": key_entry.key}), 200
-
-@app.route('/delete_all_keys', methods=['DELETE'])
-def delete_all_keys():
-    try:
-        num_deleted = db.session.query(Key).delete()
-        db.session.commit()
-        return jsonify({"message": f"{num_deleted} keys deleted successfully"}), 200
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"message": "Failed to delete keys", "error": str(e)}), 500
 
 @app.route('/keys', methods=['GET'])
 def get_keys():
-    all_keys = Key.query.all()
+    keys = Key.query.all()
     keys_list = [
         {
             "id": key.id,
             "key": key.key,
             "hwid": key.hwid,
             "usage_limit": key.usage_limit,
-            "expiration_date": key.expiration_date.strftime("%Y-%m-%d %H:%M:%S"),
-            "uses": key.uses
-        } for key in all_keys
+            "expiration_date": key.expiration_date,
+            "uses": key.uses,
+        }
+        for key in keys
     ]
-    return jsonify(keys_list)
+    return jsonify(keys_list), 200
+
+# Diğer endpointler burada...
 
 def delete_expired_keys():
     with app.app_context():
@@ -113,7 +64,7 @@ def delete_expired_keys():
             for key in expired_keys:
                 db.session.delete(key)
             db.session.commit()
-            time.sleep(60)  # Her 60 saniyede bir kontrol et
+            time.sleep(60)
 
 if __name__ == '__main__':
     threading.Thread(target=delete_expired_keys, daemon=True).start()
