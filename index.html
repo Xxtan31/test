@@ -2,56 +2,74 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Kayıtlı Anahtarlar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anahtarlar</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+        }
         table {
-            border-collapse: collapse;
             width: 100%;
-            margin-bottom: 20px;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         th, td {
+            padding: 10px;
             border: 1px solid #ccc;
-            padding: 8px;
             text-align: left;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #007BFF;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        h1 {
+            color: #333;
         }
     </style>
 </head>
 <body>
-    <h1>Kayıtlı Anahtarlar</h1>
+    <h1>Anahtarlar Listesi</h1>
     <table>
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Anahtar</th>
-                <th>Kullanım Limiti</th>
-                <th>Sona Erme Tarihi</th>
-                <th>Kullanım Sayısı</th>
                 <th>HWID</th>
+                <th>Kullanım Limiti</th>
+                <th>Son Kullanma Tarihi</th>
+                <th>Kullanım Sayısı</th>
             </tr>
         </thead>
-        <tbody id="keys-table-body"></tbody>
+        <tbody id="keys-table-body">
+            <!-- Anahtarlar burada gösterilecek -->
+        </tbody>
     </table>
-
     <script>
         fetch('/keys')
             .then(response => response.json())
             .then(data => {
                 const tableBody = document.getElementById('keys-table-body');
                 data.forEach(key => {
-                    const row = `<tr>
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
                         <td>${key.id}</td>
                         <td>${key.key}</td>
+                        <td>${key.hwid || 'Yok'}</td>
                         <td>${key.usage_limit}</td>
                         <td>${key.expiration_date}</td>
                         <td>${key.uses}</td>
-                        <td>${key.hwid || 'N/A'}</td>
-                    </tr>`;
-                    tableBody.innerHTML += row;
+                    `;
+                    tableBody.appendChild(row);
                 });
-            });
+            })
+            .catch(error => console.error('Error fetching keys:', error));
     </script>
 </body>
 </html>
