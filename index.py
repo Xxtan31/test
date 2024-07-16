@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
+import os
 import threading
 import time
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///keys.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///keys.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -22,7 +23,7 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    return open('index.html').read()
+    return open('../index.html').read()
 
 @app.route('/create_key', methods=['POST'])
 def create_key():
@@ -66,4 +67,4 @@ def delete_expired_keys():
 
 if __name__ == '__main__':
     threading.Thread(target=delete_expired_keys, daemon=True).start()
-    app.run(debug=True)
+    app.run()
