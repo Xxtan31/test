@@ -2,62 +2,70 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Kayıtlı Anahtarlar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Yönetimi</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
         table {
-            border-collapse: collapse;
             width: 100%;
-            margin-bottom: 20px;
+            border-collapse: collapse;
         }
         th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
+            padding: 10px;
             text-align: left;
+            border-bottom: 1px solid #ccc;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #f4f4f4;
         }
     </style>
 </head>
 <body>
-    <h1>Kayıtlı Anahtarlar</h1>
+    <h1>Key Yönetimi</h1>
     <table>
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Anahtar</th>
-                <th>Kullanım Limiti</th>
-                <th>Sona Erme Tarihi</th>
+                <th>Key</th>
+                <th>Limit</th>
                 <th>Kullanım Sayısı</th>
+                <th>Son Kullanma Tarihi</th>
                 <th>HWID</th>
             </tr>
         </thead>
-        <tbody id="keys-table-body"></tbody>
+        <tbody id="key-table-body">
+            <!-- Veriler buraya eklenecek -->
+        </tbody>
     </table>
 
     <script>
-        function fetchKeys() {
-            fetch('/keys')
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.getElementById('keys-table-body');
-                    tableBody.innerHTML = ''; // Temizle
-                    data.forEach(key => {
-                        const row = `<tr>
-                            <td>${key.id}</td>
-                            <td>${key.key}</td>
-                            <td>${key.usage_limit}</td>
-                            <td>${key.expiration_date}</td>
-                            <td>${key.uses}</td>
-                            <td>${key.hwid || 'N/A'}</td>
-                        </tr>`;
-                        tableBody.innerHTML += row;
-                    });
-                })
-                .catch(error => console.error('Error fetching keys:', error));
+        async function fetchKeys() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/keys');
+                const data = await response.json();
+                const tableBody = document.getElementById('key-table-body');
+
+                data.forEach(keyData => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${keyData.id}</td>
+                        <td>${keyData.key}</td>
+                        <td>${keyData.usage_limit}</td>
+                        <td>${keyData.uses}</td>
+                        <td>${keyData.expiration_date}</td>
+                        <td>${keyData.hwid || 'Yok'}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Veri alınırken hata oluştu:', error);
+            }
         }
 
-        fetchKeys(); // Sayfa yüklendiğinde anahtarları getir
+        fetchKeys();
     </script>
 </body>
 </html>
