@@ -105,6 +105,10 @@ def get_keys():
     ]
     return jsonify(keys_list)
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
 # Uygulamanın ana bloğu
 if __name__ == '__main__':
     threading.Thread(target=delete_expired_keys, daemon=True).start()
