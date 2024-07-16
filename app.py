@@ -1,7 +1,6 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
-from flask import render_template
 import threading
 import time
 
@@ -21,10 +20,6 @@ class Key(db.Model):
 with app.app_context():
     db.create_all()
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
 # Key oluşturma endpointi
 @app.route('/create_key', methods=['POST'])
 def create_key():
@@ -39,10 +34,6 @@ def create_key():
     db.session.commit()
     
     return jsonify({"message": "Key created successfully"}), 201
-
-
-
-
 
 # Key kullanma endpointi (HWID ile ilişkilendirir)
 @app.route('/use_key', methods=['POST'])
@@ -66,6 +57,12 @@ def use_key():
     
     if key_entry.uses >= key_entry.usage_limit:
         return jsonify({"message": "Key usage limit reached"}), 403
+    
+    key_entry.uses += 1
+    key_entry.hwid = hwid
+    db.session.commit()
+    return jsonify({"message": "Key used successfully"}), 200
+
     
     key_entry.uses += 1
     key_entry.hwid = hwid
@@ -113,6 +110,10 @@ def get_keys():
         for key in keys
     ]
     return jsonify(keys_list), 200
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 def delete_expired_keys():
     with app.app_context():
