@@ -92,10 +92,18 @@ def delete_all_keys():
 
 @app.route('/keys', methods=['GET'])
 def get_keys():
-    keys = Key.query.all()
-    keys_list = [{'id': key.id, 'key': key.key, 'hwid': key.hwid, 'usage_limit': key.usage_limit,
-                  'expiration_date': key.expiration_date, 'uses': key.uses} for key in keys]
-    return render_template('keys.html', keys_list=keys_list)  # Burada şablon kullanılarak veriler gönderiliyor
+    all_keys = Key.query.all()
+    keys_list = [
+        {
+            "id": key.id,
+            "key": key.key,
+            "hwid": key.hwid,
+            "usage_limit": key.usage_limit,
+            "expiration_date": key.expiration_date.strftime("%Y-%m-%d %H:%M:%S"),
+            "uses": key.uses
+        } for key in all_keys
+    ]
+    return jsonify(keys_list)
 
 # Uygulamanın ana bloğu
 if __name__ == '__main__':
