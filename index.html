@@ -4,24 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Key Yönetimi</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ccc;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Key Yönetimi</h1>
@@ -46,8 +29,8 @@
             try {
                 const response = await fetch('http://127.0.0.1:5000/keys');
                 const data = await response.json();
-                const tableBody = document.getElementById('key-table-body');
 
+                const tableBody = document.getElementById('key-table-body');
                 data.forEach(keyData => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -65,7 +48,7 @@
             }
         }
 
-        fetchKeys();
+        document.addEventListener('DOMContentLoaded', fetchKeys);
     </script>
 </body>
 </html>
