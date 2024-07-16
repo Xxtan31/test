@@ -105,11 +105,16 @@ def get_keys():
     ]
     return jsonify(keys_list)
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+def delete_expired_keys():
+    with app.app_context():
+        while True:
+            now = datetime.now()
+            expired_keys = Key.query.filter(Key.expiration_date < now).all()
+            for key in expired_keys:
+                db.session.delete(key)
+            db.session.commit()
+            time.sleep(60)  # Her 60 saniyede bir kontrol et
 
-# Uygulamanın ana bloğu
 if __name__ == '__main__':
     threading.Thread(target=delete_expired_keys, daemon=True).start()
     app.run(debug=True)
