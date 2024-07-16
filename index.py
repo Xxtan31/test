@@ -23,7 +23,7 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    return open('../index.html').read()
+    return open('index.html').read()
 
 @app.route('/create_key', methods=['POST'])
 def create_key():
