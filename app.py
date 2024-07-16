@@ -93,29 +93,11 @@ def delete_all_keys():
 @app.route('/keys', methods=['GET'])
 def get_keys():
     keys = Key.query.all()
-    keys_list = [
-        {
-            "id": key.id,
-            "key": key.key,
-            "hwid": key.hwid,
-            "usage_limit": key.usage_limit,
-            "expiration_date": key.expiration_date,
-            "uses": key.uses,
-        }
-        for key in keys
-    ]
-    return jsonify(keys_list), 200
+    keys_list = [{'id': key.id, 'key': key.key, 'hwid': key.hwid, 'usage_limit': key.usage_limit,
+                  'expiration_date': key.expiration_date, 'uses': key.uses} for key in keys]
+    return render_template('keys.html', keys_list=keys_list)  # Burada şablon kullanılarak veriler gönderiliyor
 
-def delete_expired_keys():
-    with app.app_context():
-        while True:
-            now = datetime.now()
-            expired_keys = Key.query.filter(Key.expiration_date < now).all()
-            for key in expired_keys:
-                db.session.delete(key)
-            db.session.commit()
-            time.sleep(60)
-
+# Uygulamanın ana bloğu
 if __name__ == '__main__':
     threading.Thread(target=delete_expired_keys, daemon=True).start()
     app.run(debug=True)
