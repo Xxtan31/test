@@ -11,7 +11,6 @@
             <tr>
                 <th>ID</th>
                 <th>Anahtar</th>
-                <th>HWID</th>
                 <th>Kullanım Limiti</th>
                 <th>Sona Erme Tarihi</th>
                 <th>Kullanım Sayısı</th>
@@ -19,8 +18,20 @@
         </thead>
         <tbody id="keys-table-body"></tbody>
     </table>
-    
+
+    <h2>HWID'ler</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Anahtar ID</th>
+                <th>HWID</th>
+            </tr>
+        </thead>
+        <tbody id="hwids-table-body"></tbody>
+    </table>
+
     <script>
+        // Anahtarları al
         fetch('/keys')
             .then(response => response.json())
             .then(data => {
@@ -29,12 +40,18 @@
                     const row = `<tr>
                         <td>${key.id}</td>
                         <td>${key.key}</td>
-                        <td>${key.hwid || 'N/A'}</td>
                         <td>${key.usage_limit}</td>
                         <td>${key.expiration_date}</td>
                         <td>${key.uses}</td>
                     </tr>`;
                     tableBody.innerHTML += row;
+
+                    // HWID'yi ekle
+                    const hwidRow = `<tr>
+                        <td>${key.id}</td>
+                        <td>${key.hwid || 'N/A'}</td>
+                    </tr>`;
+                    document.getElementById('hwids-table-body').innerHTML += hwidRow;
                 });
             });
     </script>
