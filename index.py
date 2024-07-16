@@ -27,33 +27,39 @@ def index():
 
 @app.route('/create_key', methods=['POST'])
 def create_key():
-    data = request.json
-    key = data.get('key')
-    usage_limit = data.get('usage_limit', 1)
-    expiration_minutes = data.get('expiration_minutes', 60)
-    expiration_date = datetime.now() + timedelta(minutes=expiration_minutes)
-    
-    new_key = Key(key=key, usage_limit=usage_limit, expiration_date=expiration_date)
-    db.session.add(new_key)
-    db.session.commit()
-    
-    return jsonify({"message": "Key created successfully"}), 201
+    try:
+        data = request.json
+        key = data.get('key')
+        usage_limit = data.get('usage_limit', 1)
+        expiration_minutes = data.get('expiration_minutes', 60)
+        expiration_date = datetime.now() + timedelta(minutes=expiration_minutes)
+
+        new_key = Key(key=key, usage_limit=usage_limit, expiration_date=expiration_date)
+        db.session.add(new_key)
+        db.session.commit()
+        
+        return jsonify({"message": "Key created successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/keys', methods=['GET'])
 def get_keys():
-    keys = Key.query.all()
-    keys_list = [
-        {
-            "id": key.id,
-            "key": key.key,
-            "hwid": key.hwid,
-            "usage_limit": key.usage_limit,
-            "expiration_date": key.expiration_date,
-            "uses": key.uses,
-        }
-        for key in keys
-    ]
-    return jsonify(keys_list), 200
+    try:
+        keys = Key.query.all()
+        keys_list = [
+            {
+                "id": key.id,
+                "key": key.key,
+                "hwid": key.hwid,
+                "usage_limit": key.usage_limit,
+                "expiration_date": key.expiration_date,
+                "uses": key.uses,
+            }
+            for key in keys
+        ]
+        return jsonify(keys_list), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 def delete_expired_keys():
     with app.app_context():
