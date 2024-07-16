@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key List</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h2>Key List</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Key</th>
+            <th>HWID</th>
+            <th>Usage Limit</th>
+            <th>Expiration Date</th>
+            <th>Uses</th>
+        </tr>
+        {% for key in keys_list %}
+        <tr>
+            <td>{{ key.id }}</td>
+            <td>{{ key.key }}</td>
+            <td>{{ key.hwid }}</td>
+            <td>{{ key.usage_limit }}</td>
+            <td>{{ key.expiration_date }}</td>
+            <td>{{ key.uses }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
